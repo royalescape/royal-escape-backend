@@ -1,0 +1,197 @@
+{
+    "info": {
+        "name": "Royal Escape – Auth (OTP + PIN Flow)",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": "Final authentication flow: check user → send OTP → verify OTP → set PIN → login with PIN → logout"
+    },
+    "item": [
+        {
+            "name": "1️⃣ Check User Exists",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/auth/check-user",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "auth",
+                        "check-user"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"phone\": \"{{phone}}\"\n}"
+                }
+            }
+        },
+        {
+            "name": "2️⃣ Send OTP (New User Only)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/auth/otp/send",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "auth",
+                        "otp",
+                        "send"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"phone\": \"{{phone}}\"\n}"
+                }
+            }
+        },
+        {
+            "name": "3️⃣ Verify OTP (Registration)",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.environment.set('registration_token', pm.response.json().registration_token);"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/auth/otp/verify",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "auth",
+                        "otp",
+                        "verify"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"phone\": \"{{phone}}\",\n  \"otp\": \"{{otp}}\"\n}"
+                }
+            }
+        },
+        {
+            "name": "4️⃣ Set PIN (Complete Registration)",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.environment.set('user_jwt', pm.response.json().access_token);"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{registration_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/auth/set-pin",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "auth",
+                        "set-pin"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"pin\": \"1234\"\n}"
+                }
+            }
+        },
+        {
+            "name": "5️⃣ Login with PIN (Existing User)",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.environment.set('user_jwt', pm.response.json().access_token);"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/auth/login-pin",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "auth",
+                        "login-pin"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"phone\": \"{{phone}}\",\n  \"pin\": \"1234\"\n}"
+                }
+            }
+        },
+        {
+            "name": "6️⃣ Logout",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{user_jwt}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/auth/logout",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "auth",
+                        "logout"
+                    ]
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,210 @@
+{
+    "info": {
+        "_postman_id": "f3b8b5f0-9c2c-4c6a-9e44-3b8f9b1a8e77",
+        "name": "Royal Escape – Pots & Admin APIs",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": "User & Admin APIs for Pots module (Lucky Draw)"
+    },
+    "item": [
+        {
+            "name": "USER - View Active Pots",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "{{base_url}}/pots",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "pots"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "USER - View Pot Details",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "{{base_url}}/pots/{{pot_id}}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "pots",
+                        "{{pot_id}}"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "USER - Enter Pot",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{user_jwt}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/pots/{{pot_id}}/enter",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "pots",
+                        "{{pot_id}}",
+                        "enter"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"quantity\": 2\n}"
+                }
+            }
+        },
+        {
+            "name": "USER - My Entries",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{user_jwt}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/pots/me/entries",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "pots",
+                        "me",
+                        "entries"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "ADMIN - Create Pot",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{admin_jwt}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/pots/admin",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "pots",
+                        "admin"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"New Year Mega Draw\",\n  \"description\": \"Win exciting prizes\",\n  \"entry_price\": 100,\n  \"max_entries\": 10000,\n  \"start_date\": \"2026-01-01T00:00:00Z\",\n  \"closing_date\": \"2026-01-10T00:00:00Z\",\n  \"faq\": [\n    { \"q\": \"Who can enter?\", \"a\": \"Anyone above 18\" }\n  ],\n  \"terms_and_conditions\": \"Standard T&C apply\"\n}"
+                }
+            }
+        },
+        {
+            "name": "ADMIN - Update Pot",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{admin_jwt}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/pots/admin/{{pot_id}}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "pots",
+                        "admin",
+                        "{{pot_id}}"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"description\": \"Updated description\",\n  \"closing_date\": \"2026-01-15T00:00:00Z\"\n}"
+                }
+            }
+        },
+        {
+            "name": "ADMIN - Change Pot Status",
+            "request": {
+                "method": "PATCH",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{admin_jwt}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/pots/admin/{{pot_id}}/status?status=active",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "pots",
+                        "admin",
+                        "{{pot_id}}",
+                        "status"
+                    ],
+                    "query": [
+                        {
+                            "key": "status",
+                            "value": "active"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "ADMIN - Declare Winner",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{admin_jwt}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/pots/admin/{{pot_id}}/declare-winner",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "pots",
+                        "admin",
+                        "{{pot_id}}",
+                        "declare-winner"
+                    ]
+                }
+            }
+        }
+    ]
+}

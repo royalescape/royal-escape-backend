@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "royal-escape-backend"
+version = "0.1.0"
+description = "FastAPI backend with MongoDB"
+authors = ["Humza"]
+
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+fastapi = "^0.111.0"
+uvicorn = {extras = ["standard"], version = "^0.30.0"}
+motor = "^3.4.0"
+pydantic = "^2.7.0"
+pydantic-settings = "^2.2.1"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = ">=1.7.4"
+twilio = "^9.0.0"
+python-dotenv = "^1.0.1"
+redis = "^7.1.0"
+certifi = "^2026.1.4"
+bcrypt = "<4.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
