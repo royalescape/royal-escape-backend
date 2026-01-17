@@ -1,0 +1,152 @@
+{
+    "info": {
+        "_postman_id": "9e5f4f1d-7e1c-4f92-9a3e-1e6b2b4b9a01",
+        "name": "Royal Escape Backend API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": "Postman collection for Royal Escape FastAPI backend"
+    },
+    "item": [
+        {
+            "name": "Auth - Send OTP",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/users/auth/otp/send",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "users",
+                        "auth",
+                        "otp",
+                        "send"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"phone\": \"{{phone}}\"\n}"
+                }
+            }
+        },
+        {
+            "name": "Auth - Verify OTP",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "const response = pm.response.json();",
+                            "pm.environment.set(\"jwt_token\", response.access_token);"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/users/auth/otp/verify",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "users",
+                        "auth",
+                        "otp",
+                        "verify"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"phone\": \"{{phone}}\",\n  \"otp\": \"123456\"\n}"
+                }
+            }
+        },
+        {
+            "name": "User - My Profile",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{jwt_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/users/me",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "users",
+                        "me"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "User - Dashboard",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{jwt_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/users/me/dashboard",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "users",
+                        "me",
+                        "dashboard"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "User - Create Profile",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{jwt_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/users/",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "users"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"phone\": \"{{phone}}\",\n  \"email\": \"user@example.com\",\n  \"name\": \"John Doe\",\n  \"address\": {\n    \"line1\": \"Magarpatta\",\n    \"city\": \"Pune\",\n    \"state\": \"MH\",\n    \"pincode\": \"411028\"\n  }\n}"
+                }
+            }
+        }
+    ]
+}

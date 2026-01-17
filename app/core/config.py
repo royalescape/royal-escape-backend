@@ -6,16 +6,21 @@ class Settings(BaseSettings):
     mongo_uri: str
     mongo_db: str = "royal--escape"
 
-
     jwt_secret: str
     jwt_algorithm: str = "HS256"
     jwt_exp_minutes: int = 60 * 24
-
 
     twilio_sid: str
     twilio_token: str
     twilio_from: str
 
+    redis_host: str
+    redis_port: int = 6379
+    redis_password: str | None = None
+
+    # OTP
+    otp_expiry_seconds: int = 3000  # 5 minutes
+    otp_resend_limit_seconds: int = 60
 
     class Config:
         env_file = ".env"
