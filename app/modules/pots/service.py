@@ -43,6 +43,14 @@ async def list_active_pots():
     return await db.pots.find({"status": "active"}).to_list(100)
 
 
+async def list_pots(status: str | None = None):
+    query = {}
+    if status:
+        query["status"] = status
+
+    return await db.pots.find(query).to_list(100)
+
+
 async def get_pot(pot_id: str):
     pot = await db.pots.find_one({"_id": ObjectId(pot_id)})
     if not pot:
@@ -135,3 +143,35 @@ async def declare_winner(pot_id: str):
         "winner_user_id": str(winner_entry["user_id"]),
         "entry_number": winner_entry["entry_number"],
     }
+
+
+async def create_pending_entry(
+    pot_id: str,
+    user_id: str,
+    quantity: int,
+):
+    pot = await get_pot(pot_id)
+
+    if pot["status"] != "active":
+        raise HTTPException(status_code=400, detail="Pot not active")
+
+    now = datetime.utcnow()
+
+    start_entry = pot["current_entries"] + 1
+    entries = []
+
+    for i in range(quantity):
+        entries.append(
+            {
+                "pot_id": ObjectId(pot_id),
+                "user_id": ObjectId(user_id),
+                "entry_number": start_entry + i,
+                "status": "pending",
+                "created_at": now,
+                "updated_at": now,
+            }
+        )
+
+    await db.pot_entries.insert_many(entries)
+
+    return {"entries_created": quantity}

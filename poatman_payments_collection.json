@@ -1,0 +1,227 @@
+{
+    "info": {
+        "name": "Royal Escape – Auth, Pots & Payment Flow",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": "End-to-end testing for auth, pots, pot entry, payment confirmation, and defaulter handling"
+    },
+    "item": [
+        {
+            "name": "AUTH",
+            "item": [
+                {
+                    "name": "Check User Exists",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/auth/check-user",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"phone\": \"{{phone}}\" }"
+                        }
+                    }
+                },
+                {
+                    "name": "Send OTP (New User)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/auth/otp/send",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"phone\": \"{{phone}}\" }"
+                        }
+                    }
+                },
+                {
+                    "name": "Verify OTP",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.environment.set('registration_token', pm.response.json().registration_token);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/auth/otp/verify",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"phone\": \"{{phone}}\", \"otp\": \"{{otp}}\" }"
+                        }
+                    }
+                },
+                {
+                    "name": "Set PIN",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.environment.set('user_jwt', pm.response.json().access_token);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{registration_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/auth/set-pin",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"pin\": \"1234\" }"
+                        }
+                    }
+                },
+                {
+                    "name": "Login with PIN",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.environment.set('user_jwt', pm.response.json().access_token);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/auth/login-pin",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"phone\": \"{{phone}}\", \"pin\": \"1234\" }"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "POTS",
+            "item": [
+                {
+                    "name": "Get Active Pots",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/pots?status=active"
+                    }
+                },
+                {
+                    "name": "Get All Pots",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/pots"
+                    }
+                },
+                {
+                    "name": "Create Pot Entry (Pending)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_jwt}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/pots/{{pot_id}}/entry",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"quantity\": 1 }"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "PAYMENT",
+            "item": [
+                {
+                    "name": "Get Scanner Image",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/payment/scanner-image"
+                    }
+                },
+                {
+                    "name": "Confirm Payment",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_jwt}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/payment/update-status",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"pot_id\": \"{{pot_id}}\", \"status\": \"confirmed\" }"
+                        }
+                    }
+                },
+                {
+                    "name": "Mark Defaulter (Cleanup)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_jwt}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/payment/update-status",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"pot_id\": \"{{pot_id}}\", \"status\": \"defaulter\" }"
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

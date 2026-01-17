@@ -8,6 +8,10 @@ class FAQSchema(BaseModel):
     a: str
 
 
+class CreatePotEntrySchema(BaseModel):
+    quantity: int = 1
+
+
 class PotCreateSchema(BaseModel):
     name: str
     description: str
