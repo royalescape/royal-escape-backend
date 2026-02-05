@@ -11,7 +11,7 @@ def generate_otp() -> str:
 
 async def send_otp_sms(phone: str, otp: str):
     twilio_client.messages.create(
-        body=f"Your verification code is {otp}",
+        body=f"Your Royal Escape code is {otp}. Unlock your dreams now!",
         from_=settings.twilio_from,
         to=phone,
     )
