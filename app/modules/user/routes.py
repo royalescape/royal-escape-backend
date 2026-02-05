@@ -10,12 +10,15 @@ from app.modules.user.service import (
     set_pin,
     login_with_pin,
     logout,
+    get_user,
+    get_dashboard,
 )
 from app.api.deps import get_current_user
 from app.modules.user.schemas import VerifyOtpRequest
 
 from app.modules.user.schemas import SendOtpRequest
 from app.modules.user.service import send_otp_registration
+from app.utils.mongo import serialize_mongo
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -59,3 +62,18 @@ async def logout_api(current=Depends(get_current_user)):
     _, payload = current
     await logout(payload)
     return {"logged_out": True}
+
+
+@router.get("/me")
+async def get_my_profile(current=Depends(get_current_user)):
+    user, _ = current
+    user = await get_user(str(user["_id"]))
+    del user["pin_hash"]
+    return serialize_mongo(user)
+
+
+@router.get("/me/dashboard")
+async def get_my_dashboard(current=Depends(get_current_user)):
+    user, _ = current
+    dashboard = await get_dashboard(str(user["_id"]))
+    return serialize_mongo(dashboard)
