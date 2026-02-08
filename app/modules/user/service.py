@@ -2,6 +2,7 @@ from datetime import datetime
 from bson import ObjectId
 from app.core.database import db
 
+
 from app.core.security import create_access_token
 from app.modules.user.otp_service import verify_otp
 from app.modules.user.otp_service import send_otp
@@ -134,3 +135,25 @@ async def logout(token_payload: dict):
 
     ttl = int(exp - datetime.utcnow().timestamp())
     await blacklist_token(jti, ttl)
+
+
+# ------------------  Register User ----------------
+
+
+async def register_user_profile(user_id: str, payload):
+    update_data = {
+        "first_name": payload.first_name,
+        "last_name": payload.last_name,
+        "pincode": payload.pincode,
+        "updated_at": datetime.utcnow(),
+    }
+
+    if payload.email:
+        update_data["email"] = payload.email
+
+    await db.users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": update_data},
+    )
+
+    return {"message": "User profile registered successfully"}

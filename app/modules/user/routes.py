@@ -3,7 +3,10 @@ from app.modules.user.schemas import (
     CheckUserRequest,
     SetPinRequest,
     LoginPinRequest,
+    RegisterUserRequest,
 )
+
+
 from app.modules.user.service import (
     check_user,
     verify_otp_registration,
@@ -12,6 +15,7 @@ from app.modules.user.service import (
     logout,
     get_user,
     get_dashboard,
+    register_user_profile,
 )
 from app.api.deps import get_current_user
 from app.modules.user.schemas import VerifyOtpRequest
@@ -77,3 +81,12 @@ async def get_my_dashboard(current=Depends(get_current_user)):
     user, _ = current
     dashboard = await get_dashboard(str(user["_id"]))
     return serialize_mongo(dashboard)
+
+
+@router.post("/register")
+async def register_user(
+    payload: RegisterUserRequest,
+    current=Depends(get_current_user),
+):
+    user, _ = current
+    return await register_user_profile(str(user["_id"]), payload)

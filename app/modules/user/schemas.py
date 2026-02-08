@@ -1,23 +1,12 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, Field, EmailStr
 from typing import Optional
 
 
-class AddressSchema(BaseModel):
-    line1: str
-    city: str
-    state: str
-    pincode: str
-
-
-class UserCreateSchema(BaseModel):
-    phone: str
-    email: Optional[EmailStr]
-    name: str
-    address: AddressSchema
-
-
-class UserResponseSchema(UserCreateSchema):
-    id: str
+class RegisterUserRequest(BaseModel):
+    first_name: str = Field(..., min_length=1, max_length=50)
+    last_name: str = Field(..., min_length=1, max_length=50)
+    email: Optional[EmailStr] = None
+    pincode: str = Field(..., min_length=4, max_length=10)
 
 
 class DashboardSchema(BaseModel):
