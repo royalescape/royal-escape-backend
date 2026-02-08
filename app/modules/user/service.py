@@ -142,8 +142,7 @@ async def logout(token_payload: dict):
 
 async def register_user_profile(user_id: str, payload):
     update_data = {
-        "first_name": payload.first_name,
-        "last_name": payload.last_name,
+        "name": payload.name,
         "pincode": payload.pincode,
         "updated_at": datetime.utcnow(),
     }

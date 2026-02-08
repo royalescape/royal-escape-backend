@@ -3,8 +3,7 @@ from typing import Optional
 
 
 class RegisterUserRequest(BaseModel):
-    first_name: str = Field(..., min_length=1, max_length=50)
-    last_name: str = Field(..., min_length=1, max_length=50)
+    name: str = Field(..., min_length=1, max_length=50)
     email: Optional[EmailStr] = None
     pincode: str = Field(..., min_length=4, max_length=10)
 
