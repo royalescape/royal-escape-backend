@@ -6,13 +6,9 @@ app = FastAPI(title="Royal Escape Backend")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",  # local frontend
-        "https://royal-escape.vercel.app",  # example prod frontend (optional)
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["*"],  # allow all origins
+    allow_credentials=False,  # MUST be False when using "*"
+    allow_methods=["*"],  # allow POST, GET, OPTIONS, etc.
+    allow_headers=["*"],  # allow Content-Type, Authorization, etc.
 )
-
 app.include_router(api_router)
