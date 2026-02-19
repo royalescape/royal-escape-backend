@@ -1,6 +1,12 @@
 from fastapi import APIRouter, Depends
 from app.api.deps import get_current_user
-from app.modules.pots.schemas import PotCreateSchema, PotUpdateSchema, PotEntrySchema
+from app.modules.pots.schemas import (
+    PotCreateSchema,
+    PotUpdateSchema,
+    PotEntrySchema,
+    PotFullResponse,
+    PotPublicResponse,
+)
 from fastapi import Query
 from app.modules.pots.schemas import CreatePotEntrySchema
 
@@ -13,12 +19,16 @@ from app.modules.pots.service import (
     enter_pot,
     get_user_entries,
     declare_winner,
-    list_pots,
     create_pending_entry,
+    get_all_pots,
+    get_pots,
 )
 
 from app.api.deps import require_admin
 from app.utils.mongo import serialize_mongo_list, serialize_mongo
+
+from typing import Optional
+from app.modules.pots.enums import PotStatus, PotType
 
 
 router = APIRouter(prefix="/pots", tags=["pots"])
@@ -27,12 +37,20 @@ router = APIRouter(prefix="/pots", tags=["pots"])
 # ---------- User APIs ----------
 
 
-@router.get("/")
-async def view_pots(
-    status: str | None = Query(default=None, description="active, draft, closed"),
+@router.get("/", response_model=list[PotPublicResponse])
+async def list_pots(
+    status: Optional[PotStatus] = Query(None),
+    type: Optional[PotType] = Query(None),
 ):
-    pots = await list_pots(status)
-    return serialize_mongo_list(pots)
+    return await get_pots(
+        type=type,
+        status=status,
+    )
+
+
+@router.get("/all", response_model=list[PotFullResponse])
+async def list_all_pots():
+    return await get_all_pots()
 
 
 @router.get("/{pot_id}")

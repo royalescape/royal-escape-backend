@@ -1,8 +1,9 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from bson import ObjectId
 from fastapi import HTTPException
 from app.core.database import db
 import random
+from app.modules.pots.enums import PotStatus, PotType
 
 
 # ---------- Admin ----------
@@ -12,7 +13,6 @@ async def create_pot(data: dict):
     now = datetime.utcnow()
     pot = {
         **data,
-        "type": "lucky_draw",
         "status": "draft",
         "current_entries": 0,
         "winner_entry_id": None,
@@ -29,7 +29,7 @@ async def update_pot(pot_id: str, data: dict):
     )
 
 
-async def change_pot_status(pot_id: str, status: str):
+async def change_pot_status(pot_id: str, status: PotStatus):
     await db.pots.update_one(
         {"_id": ObjectId(pot_id)},
         {"$set": {"status": status, "updated_at": datetime.utcnow()}},
@@ -175,3 +175,94 @@ async def create_pending_entry(
     await db.pot_entries.insert_many(entries)
 
     return {"entries_created": quantity}
+
+
+async def get_pots(
+    type: PotType,
+    status: PotStatus = PotStatus.ACTIVE,
+):
+    query = {}
+
+    if status:
+        query["status"] = status.value
+
+    if type:
+        query["type"] = type.value
+
+    # Default behavior: if nothing passed, return only active
+    if not status and not type:
+        query = {}
+
+    pots_cursor = db.pots.find(query)
+
+    results = []
+    async for pot in pots_cursor:
+        results.append(
+            {
+                "id": str(pot["_id"]),
+                "icon": pot.get("icon"),
+                "name": pot.get("name"),
+                "description": pot.get("description"),
+                "prize_amount": pot.get("prize_amount"),
+                "type": pot.get("type"),
+            }
+        )
+
+    return results
+
+
+async def get_all_pots():
+    pots_cursor = db.pots.find({})
+
+    results = []
+
+    async for pot in pots_cursor:
+        now = datetime.now(timezone.utc)
+
+        closing_date = pot.get("closing_date")
+
+        if closing_date:
+            if closing_date.tzinfo is None:
+                closing_date = closing_date.replace(tzinfo=timezone.utc)
+            delta = closing_date - now
+            days_left = max(delta.days, 0)
+
+        total_slots = pot.get("max_entries", 0)
+        filled = pot.get("current_entries", 0)
+        remaining = max(total_slots - filled, 0)
+
+        results.append(
+            {
+                "id": str(pot["_id"]),
+                "category": pot.get("type"),  # you may separate later
+                "type": pot.get("type"),
+                "name": pot.get("name"),
+                "icon": pot.get("icon"),
+                "description": pot.get("description"),
+                "prizeValue": f"₹ {pot.get('prize_amount', 0)}",
+                "totalSlots": total_slots,
+                "filled": filled,
+                "remaining": remaining,
+                "daysLeft": days_left,
+                "endDate": closing_date.isoformat() if closing_date else None,
+                "status": pot.get("status"),
+                "entryFee": pot.get("entry_price"),
+                "maxEntries": pot.get("max_entries"),
+                "revenue": filled * pot.get("entry_price", 0),
+                "createdDate": pot.get("created_at").isoformat()
+                if pot.get("created_at")
+                else None,
+                "drawDate": closing_date.isoformat() if closing_date else None,
+                "winner": str(pot.get("winner_entry_id"))
+                if pot.get("winner_entry_id")
+                else None,
+                "totalEntries": filled,
+                "prizeDetails": pot.get("prize_details"),
+                "gallery": pot.get("gallery"),
+                "faqs": pot.get("faq"),
+                "termsAndConditions": pot.get("terms_and_conditions"),
+                "color": None,
+            }
+        )
+
+    return results
