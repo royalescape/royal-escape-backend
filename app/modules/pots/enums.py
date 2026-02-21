@@ -5,7 +5,7 @@ class PotStatus(str, Enum):
     ACTIVE = "active"
     CLOSED = "closed"
     DRAFT = "draft"
-    UPCOMING = "upcomming"
+    UPCOMING = "upcoming"
 
 
 class PotType(str, Enum):
