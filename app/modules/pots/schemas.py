@@ -11,6 +11,7 @@ class FAQSchema(BaseModel):
 
 class CreatePotEntrySchema(BaseModel):
     quantity: int = 1
+    reference_id: str
 
 
 class PotCreateSchema(BaseModel):

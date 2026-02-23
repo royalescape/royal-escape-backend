@@ -109,7 +109,5 @@ async def create_entry(
 ):
     user, _ = current
     return await create_pending_entry(
-        pot_id,
-        str(user["_id"]),
-        payload.quantity,
+        pot_id, str(user["_id"]), payload.quantity, payload.reference_id
     )

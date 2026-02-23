@@ -146,9 +146,7 @@ async def declare_winner(pot_id: str):
 
 
 async def create_pending_entry(
-    pot_id: str,
-    user_id: str,
-    quantity: int,
+    pot_id: str, user_id: str, quantity: int, reference_id: str
 ):
     pot = await get_pot(pot_id)
 
@@ -167,6 +165,7 @@ async def create_pending_entry(
                 "user_id": ObjectId(user_id),
                 "entry_number": start_entry + i,
                 "status": "pending",
+                "reference_id": reference_id,
                 "created_at": now,
                 "updated_at": now,
             }
