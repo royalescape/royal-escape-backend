@@ -18,9 +18,9 @@ async def update_status(
     payload: PaymentUpdateSchema,
     current=Depends(require_admin),
 ):
-    user, _ = current
+
     return await update_payment_status(
         payload.pot_id,
-        str(user["_id"]),
+        payload.user_id,
         payload.status,
     )
