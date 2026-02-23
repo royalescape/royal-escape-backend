@@ -51,7 +51,15 @@ async def send_otp_registration(phone: str):
 
 
 async def get_dashboard(user_id: str):
-    entries = await db.user_entries.count_documents({"user_id": ObjectId(user_id)})
+    entries = await db.pot_entries.aggregate(
+        [
+            {"$match": {"user_id": ObjectId(user_id)}},
+            {"$group": {"_id": "$status", "count": {"$sum": 1}}},
+        ]
+    ).to_list(None)
+
+    entry_counts = {item["_id"]: item["count"] for item in entries}
+
     winnings = await db.user_winnings.aggregate(
         [
             {"$match": {"user_id": ObjectId(user_id)}},
@@ -60,7 +68,9 @@ async def get_dashboard(user_id: str):
     ).to_list(1)
 
     return {
-        "total_entries": entries,
+        "total_entries": sum(entry_counts.values()),
+        "confirmed_entries": entry_counts.get("confirmed", 0),
+        "pending_entries": entry_counts.get("pending", 0),
         "total_winnings": winnings[0]["total"] if winnings else 0,
     }
 
