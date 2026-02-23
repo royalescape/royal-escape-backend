@@ -1,11 +1,8 @@
-from pydantic import BaseModel, Field, EmailStr
-from typing import Optional
+from pydantic import BaseModel, Field
 
 
 class RegisterUserRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=50)
-    email: Optional[EmailStr] = None
-    pincode: str = Field(..., min_length=4, max_length=10)
 
 
 class DashboardSchema(BaseModel):

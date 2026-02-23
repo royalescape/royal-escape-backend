@@ -143,12 +143,8 @@ async def logout(token_payload: dict):
 async def register_user_profile(user_id: str, payload):
     update_data = {
         "name": payload.name,
-        "pincode": payload.pincode,
         "updated_at": datetime.utcnow(),
     }
-
-    if payload.email:
-        update_data["email"] = payload.email
 
     await db.users.update_one(
         {"_id": ObjectId(user_id)},
