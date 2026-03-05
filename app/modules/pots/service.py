@@ -153,9 +153,12 @@ async def create_pending_entry(
     if pot["status"] != "active":
         raise HTTPException(status_code=400, detail="Pot not active")
 
-    now = datetime.utcnow()
+    # Count all entries (confirmed + pending) to determine next entry number
+    total_entries = await db.pot_entries.count_documents({"pot_id": ObjectId(pot_id)})
 
-    start_entry = pot["current_entries"] + 1
+    start_entry = total_entries + 1
+
+    now = datetime.utcnow()
     entries = []
 
     for i in range(quantity):
@@ -173,7 +176,10 @@ async def create_pending_entry(
 
     await db.pot_entries.insert_many(entries)
 
-    return {"entries_created": quantity}
+    return {
+        "entries_created": quantity,
+        "entry_numbers": [e["entry_number"] for e in entries],
+    }
 
 
 async def get_pots(
@@ -265,3 +271,89 @@ async def get_all_pots():
         )
 
     return results
+
+
+async def get_user_pots(user_id: str):
+    print(user_id)
+
+    pipeline = [
+        {
+            "$match": {
+                "user_id": ObjectId(user_id),  # Convert string to ObjectId
+                "status": "confirmed",
+            }
+        },
+        {"$addFields": {"pot_obj_id": {"$toObjectId": "$pot_id"}}},
+        {
+            "$group": {
+                "_id": "$pot_obj_id",
+                "tickets": {"$sum": 1},
+                "first_enrolled": {"$min": "$created_at"},
+            }
+        },
+        {
+            "$lookup": {
+                "from": "pots",
+                "localField": "_id",
+                "foreignField": "_id",
+                "as": "pot",
+            }
+        },
+        {"$unwind": "$pot"},
+    ]
+    cursor = db.pot_entries.aggregate(pipeline)
+
+    results = []
+
+    async for doc in cursor:
+        pot = doc["pot"]
+        results.append(
+            {
+                "pot_id": str(pot["_id"]),
+                "pot_name": pot.get("name"),
+                "pot_description": pot.get("description"),
+                "pot_status": pot.get("status"),
+                "tickets": doc["tickets"],
+                "enrolled_at": doc["first_enrolled"].isoformat(),
+            }
+        )
+
+    return results
+
+
+async def check_user_pot_entry(user_id: str, pot_id: str):
+
+    cursor = db.pot_entries.find(
+        {
+            "user_id": ObjectId(user_id),
+            "pot_id": ObjectId(pot_id),
+            "status": {"$in": ["confirmed", "pending"]},  # include both statuses
+        }
+    )
+
+    entries = []
+    confirmed = []
+    pending = []
+
+    async for doc in cursor:
+        entry = {
+            "entry_number": doc.get("entry_number"),
+            "status": doc.get("status"),
+            "created_at": doc.get("created_at").isoformat(),
+        }
+        entries.append(entry)
+
+        if doc.get("status") == "confirmed":
+            confirmed.append(entry)
+        else:
+            pending.append(entry)
+
+    if not entries:
+        return {"enrolled": False}
+
+    return {
+        "enrolled": True,
+        "tickets": len(confirmed),  # only confirmed count as tickets
+        "pending_payments": len(pending),  # how many payments not completed
+        "entries": entries,  # all entries with status field
+    }

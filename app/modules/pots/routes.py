@@ -22,6 +22,8 @@ from app.modules.pots.service import (
     create_pending_entry,
     get_all_pots,
     get_pots,
+    get_user_pots,
+    check_user_pot_entry,
 )
 
 from app.api.deps import require_admin
@@ -111,3 +113,15 @@ async def create_entry(
     return await create_pending_entry(
         pot_id, str(user["_id"]), payload.quantity, payload.reference_id
     )
+
+
+@router.get("/my/enrollments")
+async def get_my_enrollments(current_user=Depends(get_current_user)):
+    user, _ = current_user
+    return await get_user_pots(str(user["_id"]))
+
+
+@router.get("/{pot_id}/my-entry")
+async def check_my_entry(pot_id: str, current_user=Depends(get_current_user)):
+    user, _ = current_user
+    return await check_user_pot_entry(str(user["_id"]), pot_id)
