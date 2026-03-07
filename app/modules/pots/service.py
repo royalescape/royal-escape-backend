@@ -274,27 +274,17 @@ async def get_all_pots():
 
 
 async def get_user_pots(user_id: str):
-    print(user_id)
 
     pipeline = [
         {
             "$match": {
-                "user_id": ObjectId(user_id),  # Convert string to ObjectId
-                "status": "confirmed",
-            }
-        },
-        {"$addFields": {"pot_obj_id": {"$toObjectId": "$pot_id"}}},
-        {
-            "$group": {
-                "_id": "$pot_obj_id",
-                "tickets": {"$sum": 1},
-                "first_enrolled": {"$min": "$created_at"},
+                "user_id": ObjectId(user_id),
             }
         },
         {
             "$lookup": {
                 "from": "pots",
-                "localField": "_id",
+                "localField": "pot_id",
                 "foreignField": "_id",
                 "as": "pot",
             }
@@ -313,8 +303,10 @@ async def get_user_pots(user_id: str):
                 "pot_name": pot.get("name"),
                 "pot_description": pot.get("description"),
                 "pot_status": pot.get("status"),
-                "tickets": doc["tickets"],
-                "enrolled_at": doc["first_enrolled"].isoformat(),
+                "ticket_number": doc.get("entry_number"),
+                "ticket_status": doc.get("status"),
+                "enrolled_at": doc["created_at"].isoformat(),
+                "cost": pot.get("entry_price"),
             }
         )
 
