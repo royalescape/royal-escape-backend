@@ -6,6 +6,7 @@ from app.core.database import db
 from app.core.security import create_access_token
 from app.modules.user.otp_service import verify_otp
 from app.modules.user.otp_service import send_otp
+from app.modules.user.schemas import RegisterUserRequest
 
 
 from fastapi import HTTPException
@@ -80,7 +81,7 @@ async def check_user(phone: str):
     user = await db.users.find_one({"phone": phone})
     if user:
         return {"exists": True, "pin_required": user.get("pin_set", False)}
-    return {"exists": False, "otp_required": True}
+    return {"exists": False, "registeration_required": True}
 
 
 # -------- OTP VERIFY (REGISTRATION STEP) --------
@@ -150,15 +151,22 @@ async def logout(token_payload: dict):
 # ------------------  Register User ----------------
 
 
-async def register_user_profile(user_id: str, payload):
-    update_data = {
+async def register_user_profile(payload: RegisterUserRequest):
+
+    pin_hash = hash_pin(payload.pin)
+
+    user_doc = {
         "name": payload.name,
+        "phone": payload.phone,
+        "pin_hash": pin_hash,
+        "pin_set": True,
+        "email": payload.email,
+        "pincode": payload.pincode,
+        "created_at": datetime.utcnow(),
         "updated_at": datetime.utcnow(),
     }
 
-    await db.users.update_one(
-        {"_id": ObjectId(user_id)},
-        {"$set": update_data},
-    )
+    result = await db.users.insert_one(user_doc)
+    token = create_access_token(subject=str(result.inserted_id))
 
-    return {"message": "User profile registered successfully"}
+    return {"message": "User registered successfully", "token": token}
