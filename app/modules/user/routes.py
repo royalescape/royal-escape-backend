@@ -84,9 +84,5 @@ async def get_my_dashboard(current=Depends(get_current_user)):
 
 
 @router.post("/register")
-async def register_user(
-    payload: RegisterUserRequest,
-    current=Depends(get_current_user),
-):
-    user, _ = current
-    return await register_user_profile(str(user["_id"]), payload)
+async def register_user(payload: RegisterUserRequest):
+    return await register_user_profile(payload)
