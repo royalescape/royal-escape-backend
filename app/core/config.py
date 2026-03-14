@@ -2,7 +2,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     app_name: str = "Royal Escape API"
-    redis_url: str
+    upstash_redis_rest_url: str
+    upstash_redis_rest_token: str
 
     mongo_uri: str
     mongo_db: str = "royal--escape"
