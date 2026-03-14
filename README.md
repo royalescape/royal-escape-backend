@@ -42,5 +42,7 @@ Admin JWT → role = admin
 
 Admin-only routes will 403 if role is wrong (as expected).
 
+
 ## start backend without docker 
 poetry run uvicorn app.main:app --reload
+

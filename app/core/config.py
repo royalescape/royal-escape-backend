@@ -1,5 +1,4 @@
-from pydantic_settings import BaseSettings
-
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     app_name: str = "Royal Escape API"
@@ -20,8 +19,11 @@ class Settings(BaseSettings):
     otp_expiry_seconds: int = 3000  # 5 minutes
     otp_resend_limit_seconds: int = 60
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore" # Prevents crashing if Vercel has extra variables
+    )
 
 
 settings = Settings()
